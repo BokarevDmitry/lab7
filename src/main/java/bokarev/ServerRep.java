@@ -21,6 +21,7 @@ public class ServerRep {
         }
         responder.close();
         context.term();
+
     }
 
 
