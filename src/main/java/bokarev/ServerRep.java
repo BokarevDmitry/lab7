@@ -14,7 +14,7 @@ public class ServerRep {
             while (!Thread.currentThread().isInterrupted()) {
                 String req = socket.recvStr();
                 System.out.println("NEW MESSAGE: " + req);
-                socket.send("reply!" + req);
+                //socket.send("reply!" + req);
             }
         } finally {
             context.destroySocket(socket);
