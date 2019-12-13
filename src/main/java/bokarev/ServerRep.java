@@ -9,7 +9,7 @@ import java.util.SortedMap;
 public class ServerRep {
     public static void main(String[] args) {
         ZMQ.Context context = ZMQ.context(1);
-        ZMQ.Socket responder = context.socket(SocketType.REP);
+        ZMQ.Socket responder = context.socket(SocketType.DEALER);
         responder.connect("tcp://localhost:5560");
         System.out.println("Waiting for requests...");
         while (!Thread.currentThread().isInterrupted()) {
