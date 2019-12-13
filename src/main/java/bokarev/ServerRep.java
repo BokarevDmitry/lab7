@@ -13,7 +13,7 @@ public class ServerRep {
         responder.connect("tcp://localhost:5560");
         while (!Thread.currentThread().isInterrupted()) {
             String string = responder.recvStr(0);
-            System.out.printf("Received request: [%s]", string);
+            System.out.printf("Received request: [%s]\n", string);
             responder.send("World");
         }
         responder.close();
