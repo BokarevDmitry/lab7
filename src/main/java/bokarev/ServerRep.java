@@ -8,22 +8,15 @@ import java.util.SortedMap;
 
 public class ServerRep {
     public static void main(String[] args) {
-        ZContext context = new ZContext();
-        ZMQ.Socket socket = context.createSocket(SocketType.REP);
-        try {
-            socket.bind("tcp://localhost:5560");
-            System.out.println("bind");
-            while (!Thread.currentThread().isInterrupted()) {
-                String req = socket.recvStr();
-                System.out.println("NEW MESSAGE: " + req);
-                socket.send("reply!" + req);
-            }
-        } finally {
-            context.destroySocket(socket);
-            context.destroy();
+        ZMQ.Context context = ZMQ.context(1);
+        ZMQ.Socket responder = context.socket(SocketType.REP);
+        responder.connect("tcp://localhost:5560");
+        while (!Thread.currentThread().isInterrupted()) {
+            String string = responder.recvStr(0);
+            System.out.printf("Received request: [%s]", string);
+            responder.send("World");
         }
-
-
-
+        responder.close();
+        context.term();
     }
 }
