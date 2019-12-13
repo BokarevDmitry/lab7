@@ -7,7 +7,6 @@ import java.util.Arrays;
 
 public class kvsimple {
     private final String key;
-
     private long sequence;
     private final byte[] body;
 
