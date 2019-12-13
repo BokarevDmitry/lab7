@@ -4,9 +4,6 @@ import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
 
 public class ServerRep {
     public static void main(String[] args) {
