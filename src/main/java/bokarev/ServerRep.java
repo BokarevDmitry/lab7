@@ -25,7 +25,7 @@ public class ServerRep {
     }
 
 
-    public void run() {
+    /*public void run() {
         ZContext ctx = new ZContext();
 
 // execute state snapshot request
@@ -84,6 +84,6 @@ public class ServerRep {
         snapshot.send(identity, ZMQ.SNDMORE);
         msg.send(snapshot);
     }
-
+*/
 
 }
