@@ -11,6 +11,7 @@ public class ServerRep {
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket responder = context.socket(SocketType.REP);
         responder.connect("tcp://localhost:5560");
+        System.out.println("Waiting for requests...");
         while (!Thread.currentThread().isInterrupted()) {
             String string = responder.recvStr(0);
             System.out.printf("Received request: [%s]\n", string);
