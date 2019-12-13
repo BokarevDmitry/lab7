@@ -8,7 +8,7 @@ import org.zeromq.ZMQ;
 public class ServerRep {
     public static void main(String[] args) {
         ZMQ.Context context = ZMQ.context(1);
-        ZMQ.Socket responder = context.socket(SocketType.DEALER);
+        ZMQ.Socket responder = context.socket(SocketType.REQ);
         responder.connect("tcp://localhost:5560");
         System.out.println("Waiting for requests...");
         while (!Thread.currentThread().isInterrupted()) {
@@ -20,6 +20,7 @@ public class ServerRep {
         context.term();
 
     }
+}
 
 
     /*public void run() {
@@ -83,4 +84,4 @@ public class ServerRep {
     }
 */
 
-}
+
