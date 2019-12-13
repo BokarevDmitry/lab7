@@ -1,45 +1,83 @@
-package bokarev
+package bokarev;
+
+import org.zeromq.ZMQ;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class kvsimple {
     private final String key;
 
     private long sequence;
     private final byte[] body;
-public kvsimple(String key, long sequence, byte[] body) {
-        this.key = key; this.sequence = sequence; this.body = body;
+
+    public kvsimple(String key, long sequence, byte[] body) {
+        this.key = key;
+        this.sequence = sequence;
+        this.body = body;
     }
-    public int hashCode() {
-    } final int prime = 31;
-    public String getKey() { return key;} int result = 1;
-    public long getSequence() { return sequence; } result = prime * result + Arrays.hashCode(body);
-    public void setSequence(long sequence) { this.sequence = sequence;} result = prime * result + ((key == null) ? 0 : key.hashCode());
-    public byte[] getBody() { result = prime * result + (int) (sequence ^ (sequence >>> 32));
-        return body; }
-    public void send(Socket publisher) {
+
+    public String getKey() {
+        return key;
+    }
+
+    public long getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(long sequence) {
+        this.sequence = sequence;
+    }
+
+    public byte[] getBody() {
+        return body;
+    }
+
+    public void send(ZMQ.Socket publisher) {
         publisher.send(key.getBytes(), ZMQ.SNDMORE);
-        return result;
-        ByteBuffer bb = ByteBuffer.allocate(8); }
-    bb.asLongBuffer().put(sequence); public boolean equals(Object obj) {
-        publisher.send(bb.array(), ZMQ.SNDMORE); if (this == obj) return true;
-        publisher.send(body, 0); if (obj == null) return false;
+
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.asLongBuffer().put(sequence);
+        publisher.send(bb.array(), ZMQ.SNDMORE);
+        publisher.send(body, 0);
     }
-    if (getClass() != obj.getClass()) return false;
-    public static kvsimple recv(Socket updates) {
-        kvsimple other = (kvsimple) obj;
-        byte [] data = updates.recv(0);
-        if (data == null || !updates.hasReceiveMore()) return null; if (!Arrays.equals(body, other.body)) return false;
-        String key = new String(data); if (key == null) {
-            data = updates.recv(0);
-            if (other.key != null) return false;
-            if (data == null || !updates.hasReceiveMore()) return null;
-        } else if (!key.equals(other.key)) return false;
+
+    public static kvsimple recv(ZMQ.Socket updates) {
+
+        byte[] data = updates.recv(0);
+        if (data == null || !updates.hasReceiveMore()) return null;
+        String key = new String(data);
+        data = updates.recv(0);
+        if (data == null || !updates.hasReceiveMore()) return null;
         Long sequence = ByteBuffer.wrap(data).getLong();
-        if (sequence != other.sequence) return false;
         byte[] body = updates.recv(0);
-        return true;
         if (body == null || updates.hasReceiveMore()) return null;
         return new kvsimple(key, sequence, body);
     }
+
     public String toString() {
         return "kvsimple [key=" + key + ", sequence=" + sequence + ",body=" + Arrays.toString(body) + "]";
     }
+
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + Arrays.hashCode(body);
+        result = prime * result + ((key == null) ? 0 : key.hashCode());
+        result = prime * result + (int) (sequence ^ (sequence >>> 32));
+        return result;
+    }
+
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        kvsimple other = (kvsimple) obj;
+        if (!Arrays.equals(body, other.body)) return false;
+        if (key == null) {
+            if (other.key != null) return false;
+        } else if (!key.equals(other.key)) return false;
+        if (sequence != other.sequence) return false;
+        return true;
+    }
+}
