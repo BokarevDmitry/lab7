@@ -12,7 +12,7 @@ public class ServerRep {
     public static void main(String[] args) {
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket responder = context.socket(SocketType.DEALER);
-        responder.("tcp://localhost:5560");
+        responder.bind("tcp://localhost:5560");
         System.out.println("Waiting for requests...");
         while (!Thread.currentThread().isInterrupted()) {
             String string = responder.recvStr(0);
