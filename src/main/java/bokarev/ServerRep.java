@@ -13,7 +13,7 @@ public class ServerRep {
             System.out.println("bind");
             while (!Thread.currentThread().isInterrupted()) {
                 String req = socket.recvStr();
-                socket.send("reply!123" + req);
+                socket.send("reply!" + req);
             }
         } finally {
             context.destroySocket(socket);
