@@ -11,7 +11,7 @@ public class ServerRep {
         ZContext context = new ZContext();
         ZMQ.Socket socket = context.createSocket(SocketType.REP);
         try {
-            socket.bind("tcp://localhost:5555");
+            socket.bind("tcp://localhost:5560");
             System.out.println("bind");
             while (!Thread.currentThread().isInterrupted()) {
                 String req = socket.recvStr();
