@@ -49,18 +49,18 @@ public class ServerRep {
             if (kvMsg == null) break;
             kvMsg.setSequence(++sequence);
             kvMsg.send(publisher);
-            clonesrv3.kvMap.put(kvMsg.getKey(), kvMsg);
+            //clonesrv3.kvMap.put(kvMsg.getKey(), kvMsg);
             System.out.printf("I: publishing update %5d\n", sequence);
         }
 
 
         if(poller.pollin(1)) {
             byte[] identity = snapshot.recv(0);
-            if (identity == null) break; // Interrupted
+            if (identity == null) return; // Interrupted
             String request = snapshot.recvStr();
             if (!request.equals("ICANHAZ?")) {
                 System.out.println("E: bad request, aborting");
-                break;
+                return;
             }
             Iterator<Map.Entry<String, kvsimple>> iter = kvMap.entrySet().iterator();
             while (iter.hasNext()) {
