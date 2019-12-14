@@ -27,7 +27,6 @@ public class Main {
 
 
     public static void main(String[] args) {
-        try {
             ZMQ.Context context = new ZMQ.context(1);
             frontend = context.socket(SocketType.ROUTER);
             frontend.bind(FRONTEND_ADDR);
@@ -120,7 +119,7 @@ public class Main {
                 }
             }
         }
-    }
+    
 
     private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
         long now = System.currentTimeMillis();
