@@ -4,15 +4,19 @@ import javafx.util.Pair;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
 import org.zeromq.ZFrame;
+import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
+import org.zeromq.ZMsg;
 
 import java.util.HashMap;
+import java.util.Map;
 
 
 public class Main {
     private static final String FRONTEND_ADDR = "tсp://localhost:5559";
     private static final String BACKEND_ADDR = "tcp://localhost:5560";
     private static final String GET = "GET";
+    private static final String SET = "SET";
     private static final String NEW = "NEW";
     private static  final String NOTIFY = "NOTIFY";
     private static final int DOUBLE_TIMEOUT = 10000;
@@ -25,17 +29,53 @@ public class Main {
 
 
     public static void main(String[] args) {
-        ZMQ.Context context = ZMQ.context(1);
-        ZMQ.Socket responder = context.socket(SocketType.REP);
-        responder.connect("tcp://localhost:5560");
-        System.out.println("Waiting for requests...");
-        while (!Thread.currentThread().isInterrupted()) {
-            String string = responder.recvStr(0);
-            System.out.printf("Received request: [%s]\n", string);
-            responder.send("World");
+        try (ZContext context = new ZContext()){
+            frontend = context.createSocket(SocketType.ROUTER);
+            frontend.bind(FRONTEND_ADDR);
+
+            backend = context.createSocket(SocketType.ROUTER);
+            backend.bind(BACKEND_ADDR);
+
+            Poller items = context.createPoller(2);
+            items.register(frontend, Poller.POLLIN);
+            items.register(backend, Poller.POLLIN);
+            boolean more;
+
+            while (!Thread.currentThread().isInterrupted()) {
+                items.poll();
+
+                if (items.pollin(0)) {
+                    while (true) {
+                        ZMsg message = ZMsg.recvMsg(frontend);
+                        ZFrame address = message.unwrap();
+                        for (ZFrame f : message) {
+                            if (f.toString().equals(GET)) {
+                                ZMsg getMessage = new ZMsg();
+                                boolean found = false;
+                                int index = Integer.parseInt(message.getLast().toString());
+                                for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+                                    if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                                        found = true;
+                                        getMessage.add(entry.getValue().getKey().duplicate());
+                                        getMessage.add(address);
+                                        getMessage.add(message.getLast());
+                                        break;
+                                    }
+                                }
+                                send(getMessage, found, address, index);
+                                break;
+                            }
+                            if (f.toString().equals(SET))
+
+                        }
+                    }
+                }
+            }
+
+
+
+
         }
-        responder.close();
-        context.term();
 
     }
 }
