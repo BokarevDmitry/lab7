@@ -32,8 +32,8 @@ public class Main {
 
             System.out.println("a");
 
-            frontend.bind(FRONTEND_ADDR);
-            backend.bind(BACKEND_ADDR);
+            frontend.bind("tсp://localhost:5559");
+            backend.bind("tcp://localhost:5560");
             System.out.println("launch and connect broker");
 
             Poller items = context.poller(2);
