@@ -10,7 +10,7 @@ import java.util.Scanner;
 
 public class Client {
 
-    private static final String FRONTEND_ADDR = "tсp://localhost:5559";
+    private static final String FRONTEND_ADDR = "tcp://localhost:5559";
 
     public static void main(String[] args) {
         try (ZContext context = new ZContext()){
