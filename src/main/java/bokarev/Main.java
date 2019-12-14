@@ -28,9 +28,9 @@ public class Main {
     public static void main(String[] args) {
         try (ZMQ.Context context = ZMQ.context(1)){
             frontend = context.socket(SocketType.ROUTER);
-            frontend.bind(FRONTEND_ADDR);
-
             backend = context.socket(SocketType.ROUTER);
+
+            frontend.bind(FRONTEND_ADDR);
             backend.bind(BACKEND_ADDR);
 
             Poller items = context.poller(2);
