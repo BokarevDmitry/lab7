@@ -60,6 +60,7 @@ public class Main {
                                     break;
                                 }
                             }
+                            System.out.println("GET; found = " + found);
                             send(backend, getMessage, found, address, index);
                             break;
                         }
@@ -77,6 +78,7 @@ public class Main {
                                     setMessage.add(value);
                                 }
                             }
+                            System.out.println("SET; found = " + found);
                             send(backend, setMessage, found, address, index);
                             break;
                         }
