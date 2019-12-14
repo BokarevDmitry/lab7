@@ -75,7 +75,6 @@ public class Main {
                                     setMessage.add(address);
                                     setMessage.add("" + index);
                                     setMessage.add(value);
-                                    break;
                                 }
                             }
                             send(backend, setMessage, found, address, index);
