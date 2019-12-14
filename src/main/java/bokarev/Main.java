@@ -27,7 +27,7 @@ public class Main {
 
 
     public static void main(String[] args) {
-        try (){
+        try {
             ZMQ.Context context = new ZMQ.context(1);
             frontend = context.socket(SocketType.ROUTER);
             frontend.bind(FRONTEND_ADDR);
