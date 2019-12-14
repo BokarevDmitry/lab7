@@ -1,10 +1,12 @@
 package bokarev;
 
 import javafx.util.Pair;
-import org.zeromq.*;
-import org.zeromq.ZMQ;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZFrame;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
+import org.zeromq.ZMsg;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -27,14 +29,14 @@ public class Main {
 
 
     public static void main(String[] args) {
-            ZMQ.Context context = ZMQ.context(1);
-            frontend = context.socket(SocketType.ROUTER);
+        try (ZContext context = new ZContext()){
+            frontend = context.createSocket(SocketType.ROUTER);
             frontend.bind(FRONTEND_ADDR);
 
-            backend = context.socket(SocketType.ROUTER);
+            backend = context.createSocket(SocketType.ROUTER);
             backend.bind(BACKEND_ADDR);
 
-            Poller items = context.poller(2);
+            Poller items = context.createPoller(2);
             items.register(frontend, Poller.POLLIN);
             items.register(backend, Poller.POLLIN);
             boolean more;
@@ -119,7 +121,7 @@ public class Main {
                 }
             }
         }
-
+    }
 
     private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
         long now = System.currentTimeMillis();
