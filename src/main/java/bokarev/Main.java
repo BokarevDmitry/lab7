@@ -26,98 +26,97 @@ public class Main {
 
 
     public static void main(String[] args) {
-        try (ZMQ.Context context = ZMQ.context(1)){
-            Socket frontend = context.socket(SocketType.ROUTER);
-            Socket backend = context.socket(SocketType.ROUTER);
+        ZMQ.Context context = ZMQ.context(1);
+        Socket frontend = context.socket(SocketType.ROUTER);
+        Socket backend = context.socket(SocketType.ROUTER);
 
-            System.out.println("a");
+        System.out.println("a");
 
-            frontend.bind("tсp://localhost:5559");
-            backend.bind("tcp://localhost:5560");
-            System.out.println("launch and connect broker");
+        frontend.bind("tсp://localhost:5559");
+        backend.bind("tcp://localhost:5560");
+        System.out.println("launch and connect broker");
 
-            Poller items = context.poller(2);
-            items.register(frontend, Poller.POLLIN);
-            items.register(backend, Poller.POLLIN);
-            boolean more;
+        Poller items = context.poller(2);
+        items.register(frontend, Poller.POLLIN);
+        items.register(backend, Poller.POLLIN);
+        boolean more;
 
-            while (!Thread.currentThread().isInterrupted()) {
-                items.poll();
+        while (!Thread.currentThread().isInterrupted()) {
+            items.poll();
 
-                if (items.pollin(0)) {
-                    while (true) {
-                        ZMsg message = ZMsg.recvMsg(frontend);
-                        ZFrame address = message.unwrap();
-                        for (ZFrame f : message) {
-                            if (f.toString().equals(GET)) {
-                                ZMsg getMessage = new ZMsg();
-                                boolean found = false;
-                                int index = Integer.parseInt(message.getLast().toString());
-                                for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
-                                    if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
-                                        found = true;
-                                        getMessage.add(entry.getValue().getKey().duplicate());
-                                        getMessage.add(address);
-                                        getMessage.add(message.getLast());
-                                        break;
-                                    }
+            if (items.pollin(0)) {
+                while (true) {
+                    ZMsg message = ZMsg.recvMsg(frontend);
+                    ZFrame address = message.unwrap();
+                    for (ZFrame f : message) {
+                        if (f.toString().equals(GET)) {
+                            ZMsg getMessage = new ZMsg();
+                            boolean found = false;
+                            int index = Integer.parseInt(message.getLast().toString());
+                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                                    found = true;
+                                    getMessage.add(entry.getValue().getKey().duplicate());
+                                    getMessage.add(address);
+                                    getMessage.add(message.getLast());
+                                    break;
                                 }
-                                send(backend, getMessage, found, address, index);
-                                break;
                             }
-                            if (f.toString().equals(SET)) {
-                                ZMsg setMessage = new ZMsg();
-                                ZFrame value = message.pollLast();
-                                boolean found = false;
-                                int index = Integer.parseInt(message.getLast().toString());
-                                for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
-                                    if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
-                                        found = true;
-                                        setMessage.add(entry.getValue().getKey().duplicate());
-                                        setMessage.add(address);
-                                        setMessage.add("" + index);
-                                        setMessage.add(value);
-                                        break;
-                                    }
-                                }
-                                send(backend, setMessage, found, address, index);
-                                break;
-                            }
+                            send(backend, getMessage, found, address, index);
+                            break;
                         }
-                        more = frontend.hasReceiveMore();
-                        if (!more) break;
+                        if (f.toString().equals(SET)) {
+                            ZMsg setMessage = new ZMsg();
+                            ZFrame value = message.pollLast();
+                            boolean found = false;
+                            int index = Integer.parseInt(message.getLast().toString());
+                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                                    found = true;
+                                    setMessage.add(entry.getValue().getKey().duplicate());
+                                    setMessage.add(address);
+                                    setMessage.add("" + index);
+                                    setMessage.add(value);
+                                    break;
+                                }
+                            }
+                            send(backend, setMessage, found, address, index);
+                            break;
+                        }
                     }
+                    more = frontend.hasReceiveMore();
+                    if (!more) break;
                 }
+            }
 
 
-                if (items.pollin(1)) {
-                    while (true) {
-                        ZMsg message = ZMsg.recvMsg(backend);
-                        ZFrame address = message.pop();
-                        String checkFrame = message.popString();
-                        System.out.println(checkFrame);
-                        String[] interval;
+            if (items.pollin(1)) {
+                while (true) {
+                    ZMsg message = ZMsg.recvMsg(backend);
+                    ZFrame address = message.pop();
+                    String checkFrame = message.popString();
+                    System.out.println(checkFrame);
+                    String[] interval;
 
-                        switch (checkFrame) {
-                            case NEW:
-                                interval = message.popString().split(DASH);
-                                storage.put(new Pair<>(Integer.parseInt(interval[0]),
-                                        Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
-                                break;
+                    switch (checkFrame) {
+                        case NEW:
+                            interval = message.popString().split(DASH);
+                            storage.put(new Pair<>(Integer.parseInt(interval[0]),
+                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                            break;
 
-                            case NOTIFY:
-                                interval = message.popString().split(DASH);
-                                storage.replace(new Pair<>(Integer.parseInt(interval[0]),
-                                        Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
-                                break;
+                        case NOTIFY:
+                            interval = message.popString().split(DASH);
+                            storage.replace(new Pair<>(Integer.parseInt(interval[0]),
+                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                            break;
 
-                            default:
-                                message.wrap(message.pop());
-                                message.send(frontend);
-                        }
-                        more = backend.hasReceiveMore();
-                        if (!more) break;
+                        default:
+                            message.wrap(message.pop());
+                            message.send(frontend);
                     }
+                    more = backend.hasReceiveMore();
+                    if (!more) break;
                 }
             }
         }
