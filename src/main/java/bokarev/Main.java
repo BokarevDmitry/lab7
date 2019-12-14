@@ -27,14 +27,14 @@ public class Main {
 
 
     public static void main(String[] args) {
-            ZMQ.Context context = new ZMQ.context(1);
+            ZMQ.Context context = ZMQ.context(1);
             frontend = context.socket(SocketType.ROUTER);
             frontend.bind(FRONTEND_ADDR);
 
-            backend = context.createSocket(SocketType.ROUTER);
+            backend = context.socket(SocketType.ROUTER);
             backend.bind(BACKEND_ADDR);
 
-            Poller items = context.createPoller(2);
+            Poller items = context.poller(2);
             items.register(frontend, Poller.POLLIN);
             items.register(backend, Poller.POLLIN);
             boolean more;
@@ -119,7 +119,7 @@ public class Main {
                 }
             }
         }
-    
+
 
     private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
         long now = System.currentTimeMillis();
