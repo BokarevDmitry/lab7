@@ -65,81 +65,85 @@ public class Main {
                                 send(getMessage, found, address, index);
                                 break;
                             }
-                            if (f.toString().equals(SET))
-
+                            if (f.toString().equals(SET)) {
+                                ZMsg setMessage = new ZMsg();
+                                ZFrame value = message.pollLast();
+                                boolean found = false;
+                                int index = Integer.parseInt(message.getLast().toString());
+                                for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+                                    if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                                        found = true;
+                                        setMessage.add(entry.getValue().getKey().duplicate());
+                                        setMessage.add(address);
+                                        setMessage.add("" + index);
+                                        setMessage.add(value);
+                                        break;
+                                    }
+                                }
+                                send(setMessage, found, address, index);
+                                break;
+                            }
                         }
+                        more = frontend.hasReceiveMore();
+                        if (!more) break;
+                    }
+                }
+
+
+                if (items.pollin(1)) {
+                    while (true) {
+                        ZMsg message = ZMsg.recvMsg(backend);
+                        ZFrame address = message.pop();
+                        String checkFrame = message.popString();
+                        System.out.println(checkFrame);
+                        String[] interval;
+
+                        switch (checkFrame) {
+                            case NEW:
+                                interval = message.popString().split(DASH);
+                                storage.put(new Pair<>(Integer.parseInt(interval[0]),
+                                        Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                                break;
+
+                            case NOTIFY:
+                                interval = message.popString().split(DASH);
+                                storage.replace(new Pair<>(Integer.parseInt(interval[0]),
+                                        Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                                break;
+
+                            default:
+                                message.wrap(message.pop());
+                                message.send(frontend);
+                        }
+                        more = backend.hasReceiveMore();
+                        if (!more) break;
                     }
                 }
             }
-
-
-
-
         }
-
     }
+
+    private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
+        long now = System.currentTimeMillis();
+        if (now - entry.getValue().getValue() > DOUBLE_TIMEOUT) {
+            storage.remove(entry);
+            return false;
+        }
+        return true;
+    }
+
+    private static void send(ZMsg message, boolean found, ZFrame address, int index) {
+        if (found) {
+            message.send(backend);
+        } else {
+            ZMsg errorMessage = new ZMsg();
+            errorMessage.wrap(address);
+            errorMessage.add("No hash at " + index);
+        }
+    }
+
+
+    
+
 }
-
-
-    /*public void run() {
-        ZContext ctx = new ZContext();
-
-// execute state snapshot request
-        ZMQ.Socket snapshot = ctx.createSocket(SocketType.ROUTER);
-        snapshot.bind("tcp://*:5556");
-        ZMQ.Socket publisher = ctx.createSocket(SocketType.PUB);
-        publisher.bind("tcp://*:5557");
-        ZMQ.Socket collector = ctx.createSocket(SocketType.PULL);
-        collector.bind("tcp://*:5558");
-
-        ZMQ.Poller poller = ctx.createPoller(2);
-        poller.register(collector, ZMQ.Poller.POLLIN);
-        poller.register(snapshot, ZMQ.Poller.POLLIN);
-        long sequence = 0;
-        while (!Thread.currentThread().isInterrupted()) {
-            if (poller.poll(1000) < 0) break;
-        }
-// apply state updates from main thread
-        if (poller.pollin(0)) {
-            kvsimple kvMsg = kvsimple.recv(collector);
-            if (kvMsg == null) break;
-            kvMsg.setSequence(++sequence);
-            kvMsg.send(publisher);
-            //clonesrv3.kvMap.put(kvMsg.getKey(), kvMsg);
-            System.out.printf("I: publishing update %5d\n", sequence);
-        }
-
-
-        if(poller.pollin(1)) {
-            byte[] identity = snapshot.recv(0);
-            if (identity == null) return; // Interrupted
-            String request = snapshot.recvStr();
-            if (!request.equals("ICANHAZ?")) {
-                System.out.println("E: bad request, aborting");
-                return;
-            }
-            Iterator<Map.Entry<String, kvsimple>> iter = kvMap.entrySet().iterator();
-            while (iter.hasNext()) {
-                Map.Entry<String, kvsimple> entry = iter.next();
-                kvsimple msg = entry.getValue();
-                System.out.println("Sending message " + entry.getValue().getSequence());
-                this.sendMessage(msg, identity, snapshot);
-            }
-            // now send end message with sequence number
-            System.out.println("Sending state snapshot = " + sequence);
-            snapshot.send(identity, ZMQ.SNDMORE);
-            kvsimple message = new kvsimple("KTHXBAI", sequence, "".getBytes());
-            message.send(snapshot);
-        }
-
-        System.out.printf(" Interrupted\n%d messages handled\n", sequence);
-        ctx.destroy();
-    }
-
-    private void sendMessage(kvsimple msg, byte[] identity, ZMQ.Socket snapshot) {
-        snapshot.send(identity, ZMQ.SNDMORE);
-        msg.send(snapshot);
-    }
-*/
-
 
