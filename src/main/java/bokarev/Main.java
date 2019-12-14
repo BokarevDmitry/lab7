@@ -10,7 +10,7 @@ import java.util.Map;
 
 
 public class Main {
-    private static final String FRONTEND_ADDR = "tсp://localhost:5559";
+    private static final String FRONTEND_ADDR = "tcp://localhost:5559";
     private static final String BACKEND_ADDR = "tcp://localhost:5560";
     private static final String GET = "GET";
     private static final String SET = "SET";
@@ -32,8 +32,8 @@ public class Main {
 
         System.out.println("a");
 
-        frontend.bind("tсp://localhost:5559");
-        backend.bind("tcp://localhost:5560");
+        frontend.bind(FRONTEND_ADDR);
+        backend.bind(BACKEND_ADDR);
         System.out.println("launch and connect broker");
 
         Poller items = context.poller(2);
