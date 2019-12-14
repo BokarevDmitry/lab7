@@ -1,12 +1,9 @@
 package bokarev;
 
 import javafx.util.Pair;
-import org.zeromq.SocketType;
-import org.zeromq.ZContext;
-import org.zeromq.ZFrame;
+import org.zeromq.*;
 import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
-import org.zeromq.ZMsg;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,14 +26,14 @@ public class Main {
 
 
     public static void main(String[] args) {
-        try (ZContext context = new ZContext()){
-            frontend = context.createSocket(SocketType.ROUTER);
+        try (ZMQ.Context context = ZMQ.context(1)){
+            frontend = context.socket(SocketType.ROUTER);
             frontend.bind(FRONTEND_ADDR);
 
-            backend = context.createSocket(SocketType.ROUTER);
+            backend = context.socket(SocketType.ROUTER);
             backend.bind(BACKEND_ADDR);
 
-            Poller items = context.createPoller(2);
+            Poller items = context.poller(2);
             items.register(frontend, Poller.POLLIN);
             items.register(backend, Poller.POLLIN);
             boolean more;
