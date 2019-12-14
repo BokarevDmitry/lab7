@@ -29,6 +29,7 @@ public class Storage {
         try (ZContext context = new ZContext()){
             Socket dealer = context.createSocket(SocketType.DEALER);
             dealer.connect(BACKEND_ADDR);
+            System.out.println("Connected to Proxy Backend 5560...");
             long start = System.currentTimeMillis();
             Poller poller = context.createPoller(1);
             poller.register(dealer, Poller.POLLIN);

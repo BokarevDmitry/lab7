@@ -19,19 +19,20 @@ public class Main {
     private static final int DOUBLE_TIMEOUT = 10000;
     private static final String DASH = "-";
 
-    private static Socket frontend;
-    private static Socket backend;
+    //private static Socket frontend;
+    //private static Socket backend;
     private static HashMap<Pair<Integer, Integer>, Pair<ZFrame, Long>> storage = new HashMap<>();
 
 
 
     public static void main(String[] args) {
         try (ZMQ.Context context = ZMQ.context(1)){
-            frontend = context.socket(SocketType.ROUTER);
-            backend = context.socket(SocketType.ROUTER);
+            Socket frontend = context.socket(SocketType.ROUTER);
+            Socket backend = context.socket(SocketType.ROUTER);
 
             frontend.bind(FRONTEND_ADDR);
             backend.bind(BACKEND_ADDR);
+            System.out.println("launch and connect broker");
 
             Poller items = context.poller(2);
             items.register(frontend, Poller.POLLIN);
@@ -59,7 +60,7 @@ public class Main {
                                         break;
                                     }
                                 }
-                                send(getMessage, found, address, index);
+                                send(backend, getMessage, found, address, index);
                                 break;
                             }
                             if (f.toString().equals(SET)) {
@@ -77,7 +78,7 @@ public class Main {
                                         break;
                                     }
                                 }
-                                send(setMessage, found, address, index);
+                                send(backend, setMessage, found, address, index);
                                 break;
                             }
                         }
@@ -129,7 +130,7 @@ public class Main {
         return true;
     }
 
-    private static void send(ZMsg message, boolean found, ZFrame address, int index) {
+    private static void send(Socket backend, ZMsg message, boolean found, ZFrame address, int index) {
         if (found) {
             message.send(backend);
         } else {

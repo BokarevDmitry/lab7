@@ -16,6 +16,7 @@ public class Client {
         try (ZContext context = new ZContext()){
             Socket req = context.createSocket(SocketType.REQ);
             req.connect(FRONTEND_ADDR);
+            System.out.println("Connected to Proxy Frontend 5559...");
             Scanner in = new Scanner(System.in);
             while (true) {
                 String[] command = in.nextLine().split(" ");
