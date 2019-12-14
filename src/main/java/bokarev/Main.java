@@ -78,7 +78,7 @@ public class Main {
                                     setMessage.add(value);
                                 }
                             }
-                            System.out.println("SET; found = " + found);
+                            System.out.println("SET; setmessage = " + setMessage);
                             send(backend, setMessage, found, address, index);
                             break;
                         }
