@@ -136,6 +136,7 @@ public class Main {
             ZMsg errorMessage = new ZMsg();
             errorMessage.wrap(address);
             errorMessage.add("No hash at " + index);
+            message.send(backend);
         }
     }
 
