@@ -6,7 +6,11 @@ import org.zeromq.ZMQ;
 
 
 public class Main {
-    private static final String FRONTEND_ADDR = "t"
+    private static final String FRONTEND_ADDR = "tсp://localhost:5559";
+    private static final String BACKEND_ADDR = "tcp://localhost:5560";
+    private static final String GET = "GET";
+    private static final String NEW = "NEW";
+
 
 
 
