@@ -1,8 +1,12 @@
 package bokarev;
 
+import javafx.util.Pair;
 import org.zeromq.SocketType;
 import org.zeromq.ZContext;
-import org.zeromq.ZMQ;
+import org.zeromq.ZFrame;
+import org.zeromq.ZMQ.Socket;
+
+import java.util.HashMap;
 
 
 public class Main {
@@ -14,6 +18,9 @@ public class Main {
     private static final int DOUBLE_TIMEOUT = 10000;
     private static final String DASH = "-";
 
+    private static Socket frontend;
+    private static Socket backend;
+    private static HashMap<Pair<Integer, Integer>, Pair<ZFrame, Long>> storage = new HashMap<>();
 
 
 
