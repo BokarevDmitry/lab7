@@ -29,9 +29,7 @@ public class Main {
         ZMQ.Context context = ZMQ.context(1);
         Socket frontend = context.socket(SocketType.ROUTER);
         Socket backend = context.socket(SocketType.ROUTER);
-
-        System.out.println("a");
-
+        
         frontend.bind(FRONTEND_ADDR);
         backend.bind(BACKEND_ADDR);
         System.out.println("launch and connect broker");
