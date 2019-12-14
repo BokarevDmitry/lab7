@@ -5,7 +5,12 @@ import org.zeromq.ZContext;
 import org.zeromq.ZMQ;
 
 
-public class ServerRep {
+public class Main {
+    private static final String FRONTEND_ADDR = "t"
+
+
+
+
     public static void main(String[] args) {
         ZMQ.Context context = ZMQ.context(1);
         ZMQ.Socket responder = context.socket(SocketType.REP);
