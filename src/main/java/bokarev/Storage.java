@@ -75,9 +75,19 @@ public class Storage {
                         arr[index] = value.charAt(0);
                         responseMessage.add(VALUE_CHANGED);
                         responseMessage.send(dealer);
+                        Storage.sendMessage
                     }
                 }
             }
         }
     }
+
+    void sendMesage(String type, ZFrame address, String answer, Socket to) {
+        ZMsg responseMessage = new ZMsg();
+        responseMessage.add(type);
+        responseMessage.add(address);
+        responseMessage.add(answer);
+        responseMessage.send(to);
+    }
+
 }
