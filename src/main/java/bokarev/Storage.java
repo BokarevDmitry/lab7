@@ -23,9 +23,14 @@ public class Storage {
     private static final String VALUE_CHANGED = "VALUE CHANGED";
 
     public static void main(String[] args) {
+        String cache = args[0];
         left = Integer.parseInt(args[1]);
         right = Integer.parseInt(args[2]);
-        str = new StringBuilder(args[0].substring(left, right));
+        char[] arr = new char[right-left+1];
+        for (int i=0; i<right-left+1; i++) {
+            arr[i] = cache.charAt(i);
+        }
+        //str = new StringBuilder(args[0].substring(left, right));
         try (ZContext context = new ZContext()){
             Socket dealer = context.createSocket(SocketType.DEALER);
             dealer.connect(BACKEND_ADDR);
@@ -55,7 +60,8 @@ public class Storage {
                         responseMessage.add(GET);
                         ZFrame address = messageReceive.pop();
                         responseMessage.add(address);
-                        responseMessage.add("" + str.charAt(index - left));
+                        //responseMessage.add("" + str.charAt(index - left));
+                        responseMessage.add(""+arr[index]);
                         responseMessage.send(dealer);
                     }
 
@@ -66,7 +72,8 @@ public class Storage {
                         responseMessage.add(SET);
                         ZFrame address = messageReceive.pop();
                         responseMessage.add(address);
-                        str.setCharAt(index - left, value.charAt(0));
+                        arr[index] = value.charAt(0);
+                        responseMessage.add(VALUE_CHANGED);
                         responseMessage.send(dealer);
                     }
                 }

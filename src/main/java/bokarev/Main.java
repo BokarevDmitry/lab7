@@ -110,6 +110,19 @@ public class Main {
                                     Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
                             break;
 
+                        case GET:
+                            message.wrap(message.pop());
+                            System.out.println("Пришел ГЕТ обратно - "+message);
+                            message.send(frontend);
+                            break;
+
+
+                        case SET:
+                            message.wrap(message.pop());
+                            System.out.println("Пришел SET обратно - "+message);
+                            message.send(frontend);
+                            break;
+
                         default:
                             message.wrap(message.pop());
                             message.send(frontend);
