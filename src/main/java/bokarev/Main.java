@@ -48,7 +48,7 @@ public class Main {
                     ZFrame address = message.unwrap();
                     for (ZFrame f : message) {
                         if (isGetMessage(f)) {
-                            ZMsg getMessage = new ZMsg();
+                            /*ZMsg getMessage = new ZMsg();
                             boolean found = false;
                             int index = Integer.parseInt(message.getLast().toString());
                             for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
@@ -62,6 +62,8 @@ public class Main {
                             }
                             System.out.println("GET; found = " + found);
                             send(backend, getMessage, found, address, index);
+                            */
+                            handleClientRequest(GET, backend, message,address, null);
                             break;
                         }
                         if (isSetMessage(f)) {
