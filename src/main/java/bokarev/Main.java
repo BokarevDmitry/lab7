@@ -175,7 +175,7 @@ public class Main {
         }
         //send(backend, getMessage, found, address, index);
         if (found) {
-            message.send(backend);
+            newMessage.send(backend);
         } else {
             ZMsg errorMessage = new ZMsg();
             errorMessage.wrap(address);
