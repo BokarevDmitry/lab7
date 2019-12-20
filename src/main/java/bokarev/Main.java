@@ -48,40 +48,12 @@ public class Main {
                     ZFrame address = message.unwrap();
                     for (ZFrame f : message) {
                         if (isGetMessage(f)) {
-                            /*ZMsg getMessage = new ZMsg();
-                            boolean found = false;
-                            int index = Integer.parseInt(message.getLast().toString());
-                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
-                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
-                                    found = true;
-                                    getMessage.add(entry.getValue().getKey().duplicate());
-                                    getMessage.add(address);
-                                    getMessage.add(message.getLast());
-                                    break;
-                                }
-                            }
-                            System.out.println("GET; found = " + found);
-                            send(backend, getMessage, found, address, index);
-                            */
-                            handleClientRequest(GET, backend, message,address, null);
+                            handleClientRequest(GET, backend, message, address, null);
                             break;
                         }
                         if (isSetMessage(f)) {
-                            ZMsg setMessage = new ZMsg();
                             ZFrame value = message.pollLast();
-                            boolean found = false;
-                            int index = Integer.parseInt(message.getLast().toString());
-                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
-                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
-                                    found = true;
-                                    setMessage.add(entry.getValue().getKey().duplicate());
-                                    setMessage.add(address);
-                                    setMessage.add("" + index);
-                                    setMessage.add(value);
-                                }
-                            }
-                            System.out.println("SET; setmessage = " + setMessage);
-                            send(backend, setMessage, found, address, index);
+                            handleClientRequest(SET, backend, message, address, value);
                             break;
                         }
                     }
@@ -165,7 +137,6 @@ public class Main {
                 newMessage.add(address);
                 if (type.equals(GET)) {
                     newMessage.add(message.getLast());
-                    System.out.println("GET equals");
                 } else {
                     newMessage.add("" + index);
                     newMessage.add(value);
@@ -173,7 +144,6 @@ public class Main {
                 break;
             }
         }
-        //send(backend, getMessage, found, address, index);
         if (found) {
             newMessage.send(backend);
         } else {
