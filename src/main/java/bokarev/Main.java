@@ -19,11 +19,7 @@ public class Main {
     private static final int DOUBLE_TIMEOUT = 10000;
     private static final String DASH = "-";
 
-    //private static Socket frontend;
-    //private static Socket backend;
     private static HashMap<Pair<Integer, Integer>, Pair<ZFrame, Long>> storage = new HashMap<>();
-
-
 
     public static void main(String[] args) {
         ZMQ.Context context = ZMQ.context(1);
@@ -46,26 +42,21 @@ public class Main {
                 handleClient(frontend, backend, more);
             }
 
-
             if (isStorageMessage(items)) {
                 while (true) {
                     ZMsg message = ZMsg.recvMsg(backend);
                     ZFrame address = message.pop();
                     String checkFrame = message.popString();
                     System.out.println(checkFrame);
-                    String[] interval;
+                    String[] interval = message.popString().split(DASH);
 
                     switch (checkFrame) {
                         case NEW:
-                            interval = message.popString().split(DASH);
-                            storage.put(new Pair<>(Integer.parseInt(interval[0]),
-                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                            updateStorage(checkFrame, interval, message, address);
                             break;
 
                         case NOTIFY:
-                            interval = message.popString().split(DASH);
-                            storage.replace(new Pair<>(Integer.parseInt(interval[0]),
-                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                            updateStorage(checkFrame, interval, message, address);
                             break;
 
                         default:
@@ -79,6 +70,17 @@ public class Main {
         }
     }
 
+    private static void updateStorage(String checkframe, String[] interval, ZMsg message, ZFrame address) {
+        if (checkframe.equals(NEW)) {
+            storage.put(new Pair<>(Integer.parseInt(interval[0]),
+                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+        } else {
+            storage.replace(new Pair<>(Integer.parseInt(interval[0]),
+                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+
+        }
+    }
+
     private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
         long now = System.currentTimeMillis();
         if (now - entry.getValue().getValue() > DOUBLE_TIMEOUT) {
@@ -86,17 +88,6 @@ public class Main {
             return false;
         }
         return true;
-    }
-
-    private static void send(Socket backend, ZMsg message, boolean found, ZFrame address, int index) {
-        if (found) {
-            message.send(backend);
-        } else {
-            ZMsg errorMessage = new ZMsg();
-            errorMessage.wrap(address);
-            errorMessage.add("No hash at " + index);
-            errorMessage.send(backend);
-        }
     }
 
     private static boolean isClientRequest(Poller items) {
