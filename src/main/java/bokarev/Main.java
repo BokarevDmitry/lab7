@@ -47,7 +47,7 @@ public class Main {
                     ZMsg message = ZMsg.recvMsg(frontend);
                     ZFrame address = message.unwrap();
                     for (ZFrame f : message) {
-                        if (f.toString().equals(GET)) {
+                        if (isGetMessage(f)) {
                             ZMsg getMessage = new ZMsg();
                             boolean found = false;
                             int index = Integer.parseInt(message.getLast().toString());
@@ -64,7 +64,7 @@ public class Main {
                             send(backend, getMessage, found, address, index);
                             break;
                         }
-                        if (f.toString().equals(SET)) {
+                        if (isSetMessage(f)) {
                             ZMsg setMessage = new ZMsg();
                             ZFrame value = message.pollLast();
                             boolean found = false;
@@ -109,7 +109,7 @@ public class Main {
                             storage.replace(new Pair<>(Integer.parseInt(interval[0]),
                                     Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
                             break;
-                            
+
                         default:
                             message.wrap(message.pop());
                             message.send(frontend);
@@ -141,6 +141,15 @@ public class Main {
         }
     }
 
+    private static boolean isGetMessage(ZFrame f) {
+        if (f.toString().equals(GET)) return true;
+        return false;
+    }
+
+    private static boolean isSetMessage(ZFrame f) {
+        if (f.toString().equals(SET)) return true;
+        return false;
+    }
 
     private static void handleClientRequest(String type, Socket backend, ZMsg message, ZFrame address, ZFrame value) {
         ZMsg newMessage = new ZMsg();
