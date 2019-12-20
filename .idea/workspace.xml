@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="324ff386-b1de-4ec9-be82-796cb97c4cfd" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="324ff386-b1de-4ec9-be82-796cb97c4cfd" name="Default" comment="" />
     <ignored path="$PROJECT_DIR$/target/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -17,7 +15,7 @@
       <file leaf-file-name="Main.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/bokarev/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="335">
+            <state relative-caret-position="443">
               <caret line="65" column="85" lean-forward="false" selection-start-line="65" selection-start-column="85" selection-end-line="65" selection-end-column="85" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -564,7 +562,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/bokarev/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="335">
+        <state relative-caret-position="443">
           <caret line="65" column="85" lean-forward="false" selection-start-line="65" selection-start-column="85" selection-end-line="65" selection-end-column="85" />
           <folding>
             <element signature="imports" expanded="true" />
