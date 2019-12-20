@@ -48,15 +48,19 @@ public class Main {
                     ZFrame address = message.pop();
                     String checkFrame = message.popString();
                     System.out.println(checkFrame);
-                    String[] interval = message.popString().split(DASH);
+                    String[] interval;
 
                     switch (checkFrame) {
                         case NEW:
-                            updateStorage(checkFrame, interval, message, address);
+                            interval = message.popString().split(DASH);
+                            storage.put(new Pair<>(Integer.parseInt(interval[0]),
+                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
                             break;
 
                         case NOTIFY:
-                            updateStorage(checkFrame, interval, message, address);
+                            interval = message.popString().split(DASH);
+                            storage.replace(new Pair<>(Integer.parseInt(interval[0]),
+                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
                             break;
 
                         default:
@@ -71,6 +75,7 @@ public class Main {
     }
 
     private static void updateStorage(String checkframe, String[] interval, ZMsg message, ZFrame address) {
+        interval = message.popString().split(DASH);
         if (checkframe.equals(NEW)) {
             storage.put(new Pair<>(Integer.parseInt(interval[0]),
                     Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
