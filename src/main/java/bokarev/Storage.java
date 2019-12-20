@@ -55,34 +55,25 @@ public class Storage {
                 if (poller.pollin(0)) {
                     ZMsg messageReceive = ZMsg.recvMsg(dealer);
                     if (messageReceive.size() == 2) {
-                        ZMsg responseMessage = new ZMsg();
                         int index = Integer.parseInt(messageReceive.pollLast().toString());
-                        responseMessage.add(GET);
                         ZFrame address = messageReceive.pop();
-                        responseMessage.add(address);
-                        //responseMessage.add("" + str.charAt(index - left));
-                        responseMessage.add(""+arr[index]);
-                        responseMessage.send(dealer);
+                        String answer = ""+arr[index];
+                        sendMessage(GET, address, answer, dealer);
                     }
 
                     if (messageReceive.size() == 3) {
-                        ZMsg responseMessage = new ZMsg();
                         String value = messageReceive.pollLast().toString();
                         int index = Integer.parseInt(messageReceive.pollLast().toString());
-                        responseMessage.add(SET);
                         ZFrame address = messageReceive.pop();
-                        responseMessage.add(address);
                         arr[index] = value.charAt(0);
-                        responseMessage.add(VALUE_CHANGED);
-                        responseMessage.send(dealer);
-                        Storage.sendMessage
+                        sendMessage(SET, address, VALUE_CHANGED, dealer);
                     }
                 }
             }
         }
     }
 
-    void sendMesage(String type, ZFrame address, String answer, Socket to) {
+    private static void sendMessage(String type, ZFrame address, String answer, Socket to) {
         ZMsg responseMessage = new ZMsg();
         responseMessage.add(type);
         responseMessage.add(address);
