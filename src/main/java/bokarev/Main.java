@@ -43,76 +43,9 @@ public class Main {
             }
 
             if (isStorageMessage(items)) {
-                while (true) {
-                    ZMsg message = ZMsg.recvMsg(backend);
-                    ZFrame address = message.pop();
-                    String checkFrame = message.popString();
-                    System.out.println(checkFrame);
-                    String[] interval;
-
-                    switch (checkFrame) {
-                        case NEW:
-                            interval = message.popString().split(DASH);
-                            storage.put(new Pair<>(Integer.parseInt(interval[0]),
-                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
-                            break;
-
-                        case NOTIFY:
-                            interval = message.popString().split(DASH);
-                            storage.replace(new Pair<>(Integer.parseInt(interval[0]),
-                                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
-                            break;
-
-                        default:
-                            message.wrap(message.pop());
-                            message.send(frontend);
-                    }
-                    more = backend.hasReceiveMore();
-                    if (!more) break;
-                }
+               handleStorage(frontend, backend, more);
             }
         }
-    }
-
-    private static void updateStorage(String checkframe, String[] interval, ZMsg message, ZFrame address) {
-        interval = message.popString().split(DASH);
-        if (checkframe.equals(NEW)) {
-            storage.put(new Pair<>(Integer.parseInt(interval[0]),
-                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
-        } else {
-            storage.replace(new Pair<>(Integer.parseInt(interval[0]),
-                    Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
-
-        }
-    }
-
-    private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
-        long now = System.currentTimeMillis();
-        if (now - entry.getValue().getValue() > DOUBLE_TIMEOUT) {
-            storage.remove(entry);
-            return false;
-        }
-        return true;
-    }
-
-    private static boolean isClientRequest(Poller items) {
-        if (items.pollin(0)) return true;
-        return false;
-    }
-
-    private static boolean isStorageMessage(Poller items) {
-        if (items.pollin(1)) return true;
-        return false;
-    }
-
-    private static boolean isGetMessage(ZFrame f) {
-        if (f.toString().equals(GET)) return true;
-        return false;
-    }
-
-    private static boolean isSetMessage(ZFrame f) {
-        if (f.toString().equals(SET)) return true;
-        return false;
     }
 
     private static void handleClient(Socket frontend, Socket backend, boolean more) {
@@ -164,8 +97,65 @@ public class Main {
         }
     }
 
+    private static void handleStorage (Socket frontend, Socket backend, boolean more) {
+        while (true) {
+            ZMsg message = ZMsg.recvMsg(backend);
+            ZFrame address = message.pop();
+            String checkFrame = message.popString();
+            System.out.println(checkFrame);
+            String[] interval;
+
+            switch (checkFrame) {
+                case NEW:
+                    interval = message.popString().split(DASH);
+                    storage.put(new Pair<>(Integer.parseInt(interval[0]),
+                            Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                    break;
+
+                case NOTIFY:
+                    interval = message.popString().split(DASH);
+                    storage.replace(new Pair<>(Integer.parseInt(interval[0]),
+                            Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
+                    break;
+
+                default:
+                    message.wrap(message.pop());
+                    message.send(frontend);
+            }
+            more = backend.hasReceiveMore();
+            if (!more) break;
+        }
+    }
 
 
 
+    private static boolean isAlive(Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry) {
+        long now = System.currentTimeMillis();
+        if (now - entry.getValue().getValue() > DOUBLE_TIMEOUT) {
+            storage.remove(entry);
+            return false;
+        }
+        return true;
+    }
+
+    private static boolean isClientRequest(Poller items) {
+        if (items.pollin(0)) return true;
+        return false;
+    }
+
+    private static boolean isStorageMessage(Poller items) {
+        if (items.pollin(1)) return true;
+        return false;
+    }
+
+    private static boolean isGetMessage(ZFrame f) {
+        if (f.toString().equals(GET)) return true;
+        return false;
+    }
+
+    private static boolean isSetMessage(ZFrame f) {
+        if (f.toString().equals(SET)) return true;
+        return false;
+    }
 }
 

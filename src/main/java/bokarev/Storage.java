@@ -70,8 +70,6 @@ public class Storage {
     }
 
     private static void sendMessage(String type, ZFrame address, String answer, Socket to) {
-
-
         ZMsg responseMessage = new ZMsg();
         responseMessage.add(type);
         responseMessage.add(address);
