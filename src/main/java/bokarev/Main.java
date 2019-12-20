@@ -45,12 +45,40 @@ public class Main {
                     ZFrame address = message.unwrap();
                     for (ZFrame f : message) {
                         if (isGetMessage(f)) {
-                            handleClientRequest(GET, backend, message, address, null);
+                            ZMsg getMessage = new ZMsg();
+                            boolean found = false;
+
+                            int index = Integer.parseInt(message.getLast().toString());
+
+
+                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                                    found = true;
+                                    getMessage.add(entry.getValue().getKey().duplicate());
+                                    getMessage.add(address);
+                                    getMessage.add(message.getLast());
+                                    break;
+                                }
+                            }
+                            message.send(backend);
                             break;
                         }
-                        else if (isSetMessage(f)) {
+                        if (isSetMessage(f)) {
+                            ZMsg setMessage = new ZMsg();
+                            boolean found = false;
                             ZFrame value = message.pollLast();
-                            handleClientRequest(SET, backend, message, address, value);
+                            int index = Integer.parseInt(message.getLast().toString());
+
+                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                                    found = true;
+                                    setMessage.add(entry.getValue().getKey().duplicate());
+                                    setMessage.add(address);
+                                    setMessage.add("" + index);
+                                    setMessage.add(value);
+                                }
+                            }
+                            message.send(backend);
                             break;
                         }
                     }
@@ -121,16 +149,16 @@ public class Main {
                 found = true;
                 newMessage.add(entry.getValue().getKey().duplicate());
                 newMessage.add(address);
-                if (type.equals(GET)) {
+                if (type == GET) {
                     newMessage.add(message.getLast());
-                    break;
                 } else {
                     newMessage.add("" + index);
                     newMessage.add(value);
                 }
-
+                break;
             }
         }
+        //send(backend, getMessage, found, address, index);
         if (found) {
             message.send(backend);
         } else {
