@@ -109,20 +109,7 @@ public class Main {
                             storage.replace(new Pair<>(Integer.parseInt(interval[0]),
                                     Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
                             break;
-
-                        case GET:
-                            message.wrap(message.pop());
-                            System.out.println("Пришел ГЕТ обратно - "+message);
-                            message.send(frontend);
-                            break;
-
-
-                        case SET:
-                            message.wrap(message.pop());
-                            System.out.println("Пришел SET обратно - "+message);
-                            message.send(frontend);
-                            break;
-
+                            
                         default:
                             message.wrap(message.pop());
                             message.send(frontend);
@@ -144,6 +131,37 @@ public class Main {
     }
 
     private static void send(Socket backend, ZMsg message, boolean found, ZFrame address, int index) {
+        if (found) {
+            message.send(backend);
+        } else {
+            ZMsg errorMessage = new ZMsg();
+            errorMessage.wrap(address);
+            errorMessage.add("No hash at " + index);
+            errorMessage.send(backend);
+        }
+    }
+
+
+    private static void handleClientRequest(String type, Socket backend, ZMsg message, ZFrame address, ZFrame value) {
+        ZMsg newMessage = new ZMsg();
+        boolean found = false;
+
+        int index = Integer.parseInt(message.getLast().toString());
+        for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+            if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                found = true;
+                newMessage.add(entry.getValue().getKey().duplicate());
+                newMessage.add(address);
+                if (type.equals(GET)) {
+                    newMessage.add(message.getLast());
+                } else {
+                    newMessage.add("" + index);
+                    newMessage.add(value);
+                }
+                break;
+            }
+        }
+        //send(backend, getMessage, found, address, index);
         if (found) {
             message.send(backend);
         } else {
