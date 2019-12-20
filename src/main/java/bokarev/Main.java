@@ -15,7 +15,7 @@ public class Main {
     private static final String GET = "GET";
     private static final String SET = "SET";
     private static final String NEW = "NEW";
-    private static  final String NOTIFY = "NOTIFY";
+    private static final String NOTIFY = "NOTIFY";
     private static final int DOUBLE_TIMEOUT = 10000;
     private static final String DASH = "-";
 
