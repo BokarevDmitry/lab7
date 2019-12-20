@@ -165,6 +165,7 @@ public class Main {
                 newMessage.add(address);
                 if (type.equals(GET)) {
                     newMessage.add(message.getLast());
+                    System.out.println("GET equals");
                 } else {
                     newMessage.add("" + index);
                     newMessage.add(value);
