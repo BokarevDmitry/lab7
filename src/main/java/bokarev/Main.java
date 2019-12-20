@@ -37,33 +37,17 @@ public class Main {
         Poller items = context.poller(2);
         items.register(frontend, Poller.POLLIN);
         items.register(backend, Poller.POLLIN);
-        boolean more;
+        boolean more = true;
 
         while (!Thread.currentThread().isInterrupted()) {
             items.poll();
 
-            if (items.pollin(0)) {
-                while (true) {
-                    ZMsg message = ZMsg.recvMsg(frontend);
-                    ZFrame address = message.unwrap();
-                    for (ZFrame f : message) {
-                        if (isGetMessage(f)) {
-                            handleClientRequest(GET, backend, message, address, null);
-                            break;
-                        }
-                        if (isSetMessage(f)) {
-                            ZFrame value = message.pollLast();
-                            handleClientRequest(SET, backend, message, address, value);
-                            break;
-                        }
-                    }
-                    more = frontend.hasReceiveMore();
-                    if (!more) break;
-                }
+            if (isClientRequest(items)) {
+                handleClient(frontend, backend, more);
             }
 
 
-            if (items.pollin(1)) {
+            if (isStorageMessage(items)) {
                 while (true) {
                     ZMsg message = ZMsg.recvMsg(backend);
                     ZFrame address = message.pop();
@@ -115,6 +99,16 @@ public class Main {
         }
     }
 
+    private static boolean isClientRequest(Poller items) {
+        if (items.pollin(0)) return true;
+        return false;
+    }
+
+    private static boolean isStorageMessage(Poller items) {
+        if (items.pollin(1)) return true;
+        return false;
+    }
+
     private static boolean isGetMessage(ZFrame f) {
         if (f.toString().equals(GET)) return true;
         return false;
@@ -123,6 +117,26 @@ public class Main {
     private static boolean isSetMessage(ZFrame f) {
         if (f.toString().equals(SET)) return true;
         return false;
+    }
+
+    private static void handleClient(Socket frontend, Socket backend, boolean more) {
+        while (true) {
+            ZMsg message = ZMsg.recvMsg(frontend);
+            ZFrame address = message.unwrap();
+            for (ZFrame f : message) {
+                if (isGetMessage(f)) {
+                    handleClientRequest(GET, backend, message, address, null);
+                    break;
+                }
+                if (isSetMessage(f)) {
+                    ZFrame value = message.pollLast();
+                    handleClientRequest(SET, backend, message, address, value);
+                    break;
+                }
+            }
+            more = frontend.hasReceiveMore();
+            if (!more) break;
+        }
     }
 
     private static void handleClientRequest(String type, Socket backend, ZMsg message, ZFrame address, ZFrame value) {
