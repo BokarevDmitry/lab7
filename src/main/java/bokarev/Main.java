@@ -47,10 +47,7 @@ public class Main {
                         if (isGetMessage(f)) {
                             ZMsg getMessage = new ZMsg();
                             boolean found = false;
-
                             int index = Integer.parseInt(message.getLast().toString());
-
-
                             for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
                                 if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
                                     found = true;
@@ -60,7 +57,9 @@ public class Main {
                                     break;
                                 }
                             }
-                            message.send(backend);
+                            if (found) {
+                                message.send(backend);
+                            }
                             break;
                         }
                         if (isSetMessage(f)) {
@@ -78,7 +77,9 @@ public class Main {
                                     setMessage.add(value);
                                 }
                             }
-                            message.send(backend);
+                            if (found) {
+                                message.send(backend);
+                            }
                             break;
                         }
                     }
