@@ -7,13 +7,9 @@ import org.zeromq.ZMQ.Poller;
 import org.zeromq.ZMQ.Socket;
 import org.zeromq.ZMsg;
 
-
 public class Storage {
-    private static StringBuilder str;
     private static int left;
     private static int right;
-
-
     private static final String BACKEND_ADDR = "tcp://localhost:5560";
     private static final String GET = "GET";
     private static final String SET = "SET";
@@ -30,7 +26,7 @@ public class Storage {
         for (int i=0; i<right-left+1; i++) {
             arr[i] = cache.charAt(i);
         }
-        //str = new StringBuilder(args[0].substring(left, right));
+
         try (ZContext context = new ZContext()){
             Socket dealer = context.createSocket(SocketType.DEALER);
             dealer.connect(BACKEND_ADDR);
@@ -74,6 +70,8 @@ public class Storage {
     }
 
     private static void sendMessage(String type, ZFrame address, String answer, Socket to) {
+
+
         ZMsg responseMessage = new ZMsg();
         responseMessage.add(type);
         responseMessage.add(address);

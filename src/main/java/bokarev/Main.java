@@ -19,10 +19,7 @@ public class Main {
     private static final int DOUBLE_TIMEOUT = 10000;
     private static final String DASH = "-";
 
-    //private static Socket frontend;
-    //private static Socket backend;
     private static HashMap<Pair<Integer, Integer>, Pair<ZFrame, Long>> storage = new HashMap<>();
-
 
 
     public static void main(String[] args) {
@@ -47,39 +44,13 @@ public class Main {
                     ZMsg message = ZMsg.recvMsg(frontend);
                     ZFrame address = message.unwrap();
                     for (ZFrame f : message) {
-                        if (f.toString().equals(GET)) {
-                            ZMsg getMessage = new ZMsg();
-                            boolean found = false;
-                            int index = Integer.parseInt(message.getLast().toString());
-                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
-                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
-                                    found = true;
-                                    getMessage.add(entry.getValue().getKey().duplicate());
-                                    getMessage.add(address);
-                                    getMessage.add(message.getLast());
-                                    break;
-                                }
-                            }
-                            System.out.println("GET; found = " + found);
-                            send(backend, getMessage, found, address, index);
+                        if (isGetMessage(f)) {
+                            handleClientRequest(GET, backend, message, address, null);
                             break;
                         }
-                        if (f.toString().equals(SET)) {
-                            ZMsg setMessage = new ZMsg();
+                        else if (isSetMessage(f)) {
                             ZFrame value = message.pollLast();
-                            boolean found = false;
-                            int index = Integer.parseInt(message.getLast().toString());
-                            for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
-                                if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
-                                    found = true;
-                                    setMessage.add(entry.getValue().getKey().duplicate());
-                                    setMessage.add(address);
-                                    setMessage.add("" + index);
-                                    setMessage.add(value);
-                                }
-                            }
-                            System.out.println("SET; setmessage = " + setMessage);
-                            send(backend, setMessage, found, address, index);
+                            handleClientRequest(SET, backend, message, address, value);
                             break;
                         }
                     }
@@ -110,19 +81,6 @@ public class Main {
                                     Integer.parseInt(interval[1])), new Pair<>(address, System.currentTimeMillis()));
                             break;
 
-                        case GET:
-                            message.wrap(message.pop());
-                            System.out.println("Пришел ГЕТ обратно - "+message);
-                            message.send(frontend);
-                            break;
-
-
-                        case SET:
-                            message.wrap(message.pop());
-                            System.out.println("Пришел SET обратно - "+message);
-                            message.send(frontend);
-                            break;
-
                         default:
                             message.wrap(message.pop());
                             message.send(frontend);
@@ -143,7 +101,36 @@ public class Main {
         return true;
     }
 
-    private static void send(Socket backend, ZMsg message, boolean found, ZFrame address, int index) {
+    private static boolean isGetMessage(ZFrame f) {
+        if (f.toString().equals(GET)) return true;
+        return false;
+    }
+
+    private static boolean isSetMessage(ZFrame f) {
+        if (f.toString().equals(SET)) return true;
+        return false;
+    }
+
+    private static void handleClientRequest(String type, Socket backend, ZMsg message, ZFrame address, ZFrame value) {
+        ZMsg newMessage = new ZMsg();
+        boolean found = false;
+
+        int index = Integer.parseInt(message.getLast().toString());
+        for (Map.Entry<Pair<Integer, Integer>, Pair<ZFrame, Long>> entry : storage.entrySet()) {
+            if (index >= entry.getKey().getKey() && index < entry.getKey().getValue() && isAlive(entry)) {
+                found = true;
+                newMessage.add(entry.getValue().getKey().duplicate());
+                newMessage.add(address);
+                if (type.equals(GET)) {
+                    newMessage.add(message.getLast());
+                    break;
+                } else {
+                    newMessage.add("" + index);
+                    newMessage.add(value);
+                }
+
+            }
+        }
         if (found) {
             message.send(backend);
         } else {
@@ -155,7 +142,4 @@ public class Main {
     }
 
 
-
-
 }
-
